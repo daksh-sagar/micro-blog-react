@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import ReactMarkdown from 'react-markdown'
 import axios from 'axios'
 import Page from './Page'
 
@@ -68,7 +69,9 @@ const SinglePost = () => {
         on {formattedDate}
       </p>
 
-      <div className="body-content">{post.body}</div>
+      <div className="body-content">
+        <ReactMarkdown source={post.body} />
+      </div>
     </Page>
   )
 }
