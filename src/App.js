@@ -13,6 +13,7 @@ import SinglePost from './components/SinglePost'
 import FlashMessages from './components/FlashMessages'
 import DispatchContext from './contexts/DispatchContext'
 import StateContext from './contexts/StateContext'
+import Profile from './components/Profile'
 
 axios.defaults.baseURL = 'http://localhost:8080'
 
@@ -70,6 +71,9 @@ const App = () => {
             </Route>
             <Route path="/post/:id">
               <SinglePost />
+            </Route>
+            <Route path="/profile/:username">
+              <Profile />
             </Route>
             <Route path="/about-us">
               <About />

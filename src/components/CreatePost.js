@@ -36,10 +36,13 @@ const CreatePost = () => {
   // }
 
   useEffect(() => {
-    stableDispatch({
-      type: 'flashMessage',
-      data: 'Congrats, the new post was created.',
-    })
+    if (wasSuccessful) {
+      stableDispatch({
+        type: 'flashMessage',
+        data: 'Congrats, the new post was created.',
+      })
+      console.log('How many times ?')
+    }
   }, [wasSuccessful, stableDispatch])
 
   return wasSuccessful ? (
