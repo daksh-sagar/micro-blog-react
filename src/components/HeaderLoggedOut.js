@@ -15,12 +15,11 @@ const HeaderLoggedOut = () => {
         username,
         password,
       })
-      setUsername(null)
-      setPassword(null)
-      localStorage.setItem('token', response.data.token)
-      localStorage.setItem('username', response.data.username)
-      localStorage.setItem('avatar', response.data.avatar)
-      dispatch({ type: 'login' })
+      if (response.data) {
+        setUsername(null)
+        setPassword(null)
+        dispatch({ type: 'login', data: response.data })
+      }
     } catch (error) {
       console.log(JSON.stringify(error))
     }

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useCallback, useEffect } from 'react'
 import { Redirect } from 'react-router-dom'
 import axios from 'axios'
 import Page from './Page'
@@ -25,15 +25,26 @@ const CreatePost = () => {
     }
   }
 
-  if (wasSuccessful) {
-    dispatch({
-      type: 'flashMessage',
-      value: 'Congrats, the new post was created.',
-    })
-    return <Redirect to={`/post/${wasSuccessful}`} />
-  }
+  const stableDispatch = useCallback(dispatch, [])
 
-  return (
+  // if (wasSuccessful) {
+  //   dispatch({
+  //     type: 'flashMessage',
+  //     data: 'Congrats, the new post was created.',
+  //   })
+  //   return <Redirect to={`/post/${wasSuccessful}`} />
+  // }
+
+  useEffect(() => {
+    stableDispatch({
+      type: 'flashMessage',
+      data: 'Congrats, the new post was created.',
+    })
+  }, [wasSuccessful, stableDispatch])
+
+  return wasSuccessful ? (
+    <Redirect to={`/post/${wasSuccessful}`} />
+  ) : (
     <Page title="Create Post">
       <form onSubmit={handleSubmit}>
         <div className="form-group">

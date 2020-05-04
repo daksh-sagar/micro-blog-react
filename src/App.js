@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useImmerReducer } from 'use-immer'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import axios from 'axios'
@@ -20,18 +20,24 @@ const App = () => {
   const initialState = {
     loggedIn: Boolean(localStorage.getItem('token')),
     flashMessages: [],
+    user: {
+      token: localStorage.getItem('token'),
+      username: localStorage.getItem('username'),
+      avatar: localStorage.getItem('avatar'),
+    },
   }
 
   const reducer = (draft, action) => {
     switch (action.type) {
       case 'login':
         draft.loggedIn = true
+        draft.user = action.data
         return
       case 'logout':
         draft.loggedIn = false
         return
       case 'flashMessage':
-        draft.flashMessages.push(action.value)
+        draft.flashMessages.push(action.data)
         return
       default:
         return
@@ -39,6 +45,18 @@ const App = () => {
   }
 
   const [state, dispatch] = useImmerReducer(reducer, initialState)
+
+  useEffect(() => {
+    if (state.loggedIn) {
+      localStorage.setItem('token', state.user.token)
+      localStorage.setItem('username', state.user.username)
+      localStorage.setItem('avatar', state.user.avatar)
+    } else {
+      localStorage.removeItem('token')
+      localStorage.removeItem('username')
+      localStorage.removeItem('avatar')
+    }
+  }, [state.loggedIn])
 
   return (
     <StateContext.Provider value={state}>

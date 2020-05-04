@@ -1,14 +1,13 @@
 import React, { useContext } from 'react'
 import { Link } from 'react-router-dom'
 import DispatchContext from '../contexts/DispatchContext'
+import StateContext from '../contexts/StateContext'
 
 const HeaderLoggedIn = () => {
+  const { user } = useContext(StateContext)
   const dispatch = useContext(DispatchContext)
   const handleLogout = () => {
     dispatch({ type: 'logout' })
-    localStorage.removeItem('token')
-    localStorage.removeItem('username')
-    localStorage.removeItem('avatar')
   }
 
   return (
@@ -24,7 +23,7 @@ const HeaderLoggedIn = () => {
         <img
           alt="user's profile pic"
           className="small-header-avatar"
-          src={localStorage.getItem('avatar')}
+          src={user.avatar}
         />
       </a>
       <Link className="btn btn-sm btn-success mr-2" to="/create-post">
