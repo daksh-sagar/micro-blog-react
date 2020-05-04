@@ -1,4 +1,5 @@
-import React, { useReducer } from 'react'
+import React from 'react'
+import { useImmerReducer } from 'use-immer'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import axios from 'axios'
 import Header from './components/Header'
@@ -21,23 +22,23 @@ const App = () => {
     flashMessages: [],
   }
 
-  const reducer = (state, action) => {
+  const reducer = (draft, action) => {
     switch (action.type) {
       case 'login':
-        return { ...state, loggedIn: true }
+        draft.loggedIn = true
+        return
       case 'logout':
-        return { ...state, loggedIn: false }
+        draft.loggedIn = false
+        return
       case 'flashMessage':
-        return {
-          ...state,
-          flashMessages: state.flashMessages.concat(action.value),
-        }
+        draft.flashMessages.push(action.value)
+        return
       default:
-        return state
+        return
     }
   }
 
-  const [state, dispatch] = useReducer(reducer, initialState)
+  const [state, dispatch] = useImmerReducer(reducer, initialState)
 
   return (
     <StateContext.Provider value={state}>
