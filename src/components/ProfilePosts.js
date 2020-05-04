@@ -8,9 +8,12 @@ const ProfilePosts = () => {
   const [posts, setPosts] = useState([])
 
   useEffect(() => {
+    const request = axios.CancelToken.source()
     async function fetchPosts() {
       try {
-        const response = await axios.get(`/profile/${username}/posts`)
+        const response = await axios.get(`/profile/${username}/posts`, {
+          cancelToken: request.token,
+        })
         setPosts(response.data)
       } catch (error) {
         console.log(JSON.stringify(error))
@@ -20,6 +23,10 @@ const ProfilePosts = () => {
     }
 
     fetchPosts()
+
+    return () => {
+      request.cancel()
+    }
   }, [])
 
   return isLoading ? (

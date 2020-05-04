@@ -17,17 +17,26 @@ const Profile = () => {
   })
 
   useEffect(() => {
+    const request = axios.CancelToken.source()
     async function fetchData() {
       try {
-        const response = await axios.post(`/profile/${username}`, {
-          token: user.token,
-        })
+        const response = await axios.post(
+          `/profile/${username}`,
+          {
+            token: user.token,
+          },
+          { cancelToken: request.token }
+        )
         setProfileData(response.data)
       } catch (error) {
         console.log(JSON.stringify(error))
       }
     }
     fetchData()
+
+    return () => {
+      request.cancel()
+    }
   }, [])
 
   return (
