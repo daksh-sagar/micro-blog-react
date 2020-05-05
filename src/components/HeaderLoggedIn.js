@@ -10,11 +10,18 @@ const HeaderLoggedIn = () => {
     dispatch({ type: 'logout' })
   }
 
+  const handleSearch = () => {
+    dispatch({ type: 'openSearch' })
+  }
+
   return (
     <div className="flex-row my-3 my-md-0">
-      <a href="/" className="text-white mr-2 header-search-icon">
+      <span
+        onClick={handleSearch}
+        className="text-white mr-2 header-search-icon"
+      >
         <i className="fas fa-search"></i>
-      </a>
+      </span>
       <span className="mr-2 header-chat-icon text-white">
         <i className="fas fa-comment"></i>
         <span className="chat-count-badge text-white"> </span>

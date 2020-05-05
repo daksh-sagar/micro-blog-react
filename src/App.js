@@ -16,6 +16,7 @@ import StateContext from './contexts/StateContext'
 import Profile from './components/Profile'
 import EditPost from './components/EditPost'
 import NotFound from './components/NotFound'
+import Search from './components/Search'
 
 axios.defaults.baseURL = 'http://localhost:8080'
 
@@ -28,6 +29,7 @@ const App = () => {
       username: localStorage.getItem('username'),
       avatar: localStorage.getItem('avatar'),
     },
+    isSearchOpen: false,
   }
 
   const reducer = (draft, action) => {
@@ -41,6 +43,12 @@ const App = () => {
         return
       case 'flashMessage':
         draft.flashMessages.push(action.data)
+        return
+      case 'openSearch':
+        draft.isSearchOpen = true
+        return
+      case 'closeSearch':
+        draft.isSearchOpen = false
         return
       default:
         return
@@ -93,6 +101,7 @@ const App = () => {
               <NotFound />
             </Route>
           </Switch>
+          {state.isSearchOpen && <Search />}
           <Footer />
         </Router>
       </DispatchContext.Provider>
