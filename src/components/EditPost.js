@@ -9,6 +9,7 @@ import Page from './Page'
 const EditPost = () => {
   const appDispatch = useContext(DispatchContext)
   const { user } = useContext(StateContext)
+
   const reducer = (draft, action) => {
     switch (action.type) {
       case 'fetchComplete':
@@ -25,13 +26,31 @@ const EditPost = () => {
         draft.isFetching = false
         return
       case 'submit':
-        draft.sendCount += 1
+        if (!draft.title.hasErrors && !draft.body.hasErrors) {
+          draft.sendCount += 1
+        }
         return
       case 'updateRequestStarted':
         draft.isSaving = true
         return
       case 'updateRequestFinished':
         draft.isSaving = false
+        return
+      case 'titleRules':
+        if (!action.data.trim()) {
+          draft.title.hasErrors = true
+          draft.title.message = 'Title field can not be blank'
+        } else {
+          draft.title.hasErrors = false
+        }
+        return
+      case 'bodyRules':
+        if (!action.data.trim()) {
+          draft.body.hasErrors = true
+          draft.body.message = 'Body field can not be blank'
+        } else {
+          draft.body.hasErrors = false
+        }
         return
       default:
         break
@@ -57,6 +76,8 @@ const EditPost = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    dispatch({ type: 'titleRules', data: state.title.value })
+    dispatch({ type: 'bodyRules', data: state.body.value })
     dispatch({ type: 'submit' })
   }
 
@@ -137,7 +158,15 @@ const EditPost = () => {
             onChange={(e) =>
               dispatch({ type: 'titleChange', data: e.target.value })
             }
+            onBlur={(e) =>
+              dispatch({ type: 'titleRules', data: e.target.value })
+            }
           />
+          {state.title.hasErrors && (
+            <div className="alert alert-danger small liveValidateMessage">
+              {state.title.message}
+            </div>
+          )}
         </div>
 
         <div className="form-group">
@@ -153,7 +182,15 @@ const EditPost = () => {
             onChange={(e) =>
               dispatch({ type: 'bodyChange', data: e.target.value })
             }
+            onBlur={(e) =>
+              dispatch({ type: 'bodyRules', data: e.target.value })
+            }
           />
+          {state.body.hasErrors && (
+            <div className="alert alert-danger small liveValidateMessage">
+              {state.body.message}
+            </div>
+          )}
         </div>
 
         <button disabled={state.isSaving} className="btn btn-primary">
