@@ -15,6 +15,7 @@ import DispatchContext from './contexts/DispatchContext'
 import StateContext from './contexts/StateContext'
 import Profile from './components/Profile'
 import EditPost from './components/EditPost'
+import NotFound from './components/NotFound'
 
 axios.defaults.baseURL = 'http://localhost:8080'
 
@@ -87,6 +88,9 @@ const App = () => {
             </Route>
             <Route path="/create-post">
               <CreatePost />
+            </Route>
+            <Route>
+              <NotFound />
             </Route>
           </Switch>
           <Footer />

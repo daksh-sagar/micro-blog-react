@@ -1,10 +1,11 @@
 import React, { useEffect, useContext } from 'react'
 import { useImmerReducer } from 'use-immer'
-import { useParams } from 'react-router-dom'
+import { useParams, Link, Redirect } from 'react-router-dom'
 import axios from 'axios'
 import StateContext from '../contexts/StateContext'
 import DispatchContext from '../contexts/DispatchContext'
 import Page from './Page'
+import NotFound from './NotFound'
 
 const EditPost = () => {
   const appDispatch = useContext(DispatchContext)
@@ -15,6 +16,9 @@ const EditPost = () => {
       case 'fetchComplete':
         draft.title.value = action.data.title
         draft.body.value = action.data.body
+        if (user.username !== action.data.author.username) {
+          draft.permissionProblem = true
+        }
         return
       case 'titleChange':
         draft.title.value = action.data
@@ -52,6 +56,9 @@ const EditPost = () => {
           draft.body.hasErrors = false
         }
         return
+      case 'notFound':
+        draft.notFound = true
+        return
       default:
         break
     }
@@ -72,6 +79,8 @@ const EditPost = () => {
     isSaving: false,
     id: useParams().id,
     sendCount: 0,
+    notFound: false,
+    permissionProblem: false,
   })
 
   const handleSubmit = (e) => {
@@ -88,7 +97,11 @@ const EditPost = () => {
         const response = await axios.get(`/post/${state.id}`, {
           cancelToken: request.token,
         })
-        dispatch({ type: 'fetchComplete', data: response.data })
+        if (response.data) {
+          dispatch({ type: 'fetchComplete', data: response.data })
+        } else {
+          dispatch({ type: 'notFound' })
+        }
       } catch (error) {
         console.log(JSON.stringify(error))
       } finally {
@@ -137,11 +150,25 @@ const EditPost = () => {
     }
   }, [state.sendCount])
 
+  if (state.permissionProblem) {
+    appDispatch({
+      type: 'flashMessage',
+      data: 'You do not have permission for this action',
+    })
+    return <Redirect to="/" />
+  }
+
   return state.isFetching ? (
     <Page title="Loading...">Loading...</Page>
+  ) : state.notFound ? (
+    <NotFound />
   ) : (
     <Page title="Edit Post">
-      <form onSubmit={handleSubmit}>
+      <Link className="small font-weight-bold" to={`/post/${state.id}`}>
+        {' '}
+        &#8592; Back to post
+      </Link>
+      <form className="mt-3" onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="post-title" className="text-muted mb-1">
             <small>Title</small>

@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown'
 import axios from 'axios'
 import ReactTooltip from 'react-tooltip'
 import Page from './Page'
+import NotFound from './NotFound'
 
 const SinglePost = () => {
   const { id } = useParams()
@@ -34,6 +35,10 @@ const SinglePost = () => {
 
   if (isLoading) {
     return <Page title="Loading...">Loading...</Page>
+  }
+
+  if (!isLoading && !post) {
+    return <NotFound />
   }
 
   const date = new Date(post.createdDate)
