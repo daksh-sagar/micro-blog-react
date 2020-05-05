@@ -14,6 +14,7 @@ import FlashMessages from './components/FlashMessages'
 import DispatchContext from './contexts/DispatchContext'
 import StateContext from './contexts/StateContext'
 import Profile from './components/Profile'
+import EditPost from './components/EditPost'
 
 axios.defaults.baseURL = 'http://localhost:8080'
 
@@ -69,8 +70,11 @@ const App = () => {
             <Route path="/" exact>
               {state.loggedIn ? <Home /> : <HomeGuest />}
             </Route>
-            <Route path="/post/:id">
+            <Route path="/post/:id" exact>
               <SinglePost />
+            </Route>
+            <Route path="/post/:id/edit" exact>
+              <EditPost />
             </Route>
             <Route path="/profile/:username">
               <Profile />
