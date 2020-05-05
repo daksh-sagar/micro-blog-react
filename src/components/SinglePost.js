@@ -35,7 +35,7 @@ const SinglePost = () => {
     return () => {
       request.cancel()
     }
-  }, [])
+  }, [id])
 
   useEffect(() => {
     if (deleteAttemptCount) {
