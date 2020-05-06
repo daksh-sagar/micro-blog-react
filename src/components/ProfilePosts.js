@@ -27,7 +27,7 @@ const ProfilePosts = () => {
     return () => {
       request.cancel()
     }
-  }, [])
+  }, [username])
 
   return isLoading ? (
     <>Loading...</>

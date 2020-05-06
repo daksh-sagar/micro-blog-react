@@ -1,4 +1,5 @@
-import React, { useEffect, useContext, useState } from 'react'
+import React, { useEffect, useContext } from 'react'
+import { useImmer } from 'use-immer'
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
 import Page from './Page'
@@ -6,14 +7,19 @@ import StateContext from '../contexts/StateContext'
 import ProfilePosts from './ProfilePosts'
 
 const Profile = () => {
-  const { user } = useContext(StateContext)
+  const { user, loggedIn } = useContext(StateContext)
   const { username } = useParams()
 
-  const [profileData, setProfileData] = useState({
-    profileUsername: '...',
-    profileAvatar: 'https://gravatar.com/avatar/placeholder?s=128',
-    isFollowing: false,
-    counts: { postCount: '', followerCount: '', followingCount: '' },
+  const [state, setState] = useImmer({
+    followActionLoading: false,
+    startFollowingRequestCount: 0,
+    stopFollowingRequestCount: 0,
+    profileData: {
+      profileUsername: '...',
+      profileAvatar: 'https://gravatar.com/avatar/placeholder?s=128',
+      isFollowing: false,
+      counts: { postCount: '', followerCount: '', followingCount: '' },
+    },
   })
 
   useEffect(() => {
@@ -27,7 +33,9 @@ const Profile = () => {
           },
           { cancelToken: request.token }
         )
-        setProfileData(response.data)
+        setState((draft) => {
+          draft.profileData = response.data
+        })
       } catch (error) {
         console.log(JSON.stringify(error))
       }
@@ -37,31 +45,127 @@ const Profile = () => {
     return () => {
       request.cancel()
     }
-  }, [])
+  }, [username])
+
+  useEffect(() => {
+    if (state.startFollowingRequestCount) {
+      setState((draft) => {
+        draft.followActionLoading = true
+      })
+      const request = axios.CancelToken.source()
+      async function fetchData() {
+        try {
+          const response = await axios.post(
+            `/addFollow/${state.profileData.profileUsername}`,
+            {
+              token: user.token,
+            },
+            { cancelToken: request.token }
+          )
+          setState((draft) => {
+            draft.profileData.isFollowing = true
+            draft.profileData.counts.followerCount += 1
+            draft.followActionLoading = false
+          })
+        } catch (error) {
+          console.log(JSON.stringify(error))
+        }
+      }
+      fetchData()
+
+      return () => {
+        request.cancel()
+      }
+    }
+  }, [state.startFollowingRequestCount])
+
+  useEffect(() => {
+    if (state.stopFollowingRequestCount) {
+      setState((draft) => {
+        draft.followActionLoading = true
+      })
+      const request = axios.CancelToken.source()
+      async function fetchData() {
+        try {
+          const response = await axios.post(
+            `/removeFollow/${state.profileData.profileUsername}`,
+            {
+              token: user.token,
+            },
+            { cancelToken: request.token }
+          )
+          setState((draft) => {
+            draft.profileData.isFollowing = false
+            draft.profileData.counts.followerCount -= 1
+            draft.followActionLoading = false
+          })
+        } catch (error) {
+          console.log(JSON.stringify(error))
+        }
+      }
+      fetchData()
+
+      return () => {
+        request.cancel()
+      }
+    }
+  }, [state.stopFollowingRequestCount])
+
+  const startFollowing = () => {
+    setState((draft) => {
+      draft.startFollowingRequestCount += 1
+    })
+  }
+  const stopFollowing = () => {
+    setState((draft) => {
+      draft.stopFollowingRequestCount += 1
+    })
+  }
 
   return (
     <Page title="Profile">
       <h2>
         <img
           className="avatar-small"
-          src={profileData.profileAvatar}
+          src={state.profileData.profileAvatar}
           alt="profile pic"
         />{' '}
-        {profileData.profileUsername}
-        <button className="btn btn-primary btn-sm ml-2">
-          Follow <i className="fas fa-user-plus"></i>
-        </button>
+        {state.profileData.profileUsername}
+        {loggedIn &&
+          !state.profileData.isFollowing &&
+          user.username !== state.profileData.profileUsername &&
+          state.profileData.profileUsername !== '...' && (
+            <button
+              onClick={startFollowing}
+              disabled={state.followActionLoading}
+              className="btn btn-primary btn-sm ml-2"
+            >
+              Follow <i className="fas fa-user-plus"></i>
+            </button>
+          )}
+        {loggedIn &&
+          state.profileData.isFollowing &&
+          user.username !== state.profileData.profileUsername &&
+          state.profileData.profileUsername !== '...' && (
+            <button
+              onClick={stopFollowing}
+              disabled={state.followActionLoading}
+              className="btn btn-danger btn-sm ml-2"
+            >
+              Stop Following <i className="fas fa-user-times"></i>
+            </button>
+          )}
       </h2>
 
       <div className="profile-nav nav nav-tabs pt-2 mb-4">
         <a href="/" className="active nav-item nav-link">
-          Posts: {profileData.counts.postCount}
+          Posts: {state.profileData.counts.postCount}
         </a>
         <a href="/" className="nav-item nav-link">
-          Followers: {profileData.counts.followerCount}
+          Followers: {state.profileData.counts.followerCount}
         </a>
         <a href="/" className="nav-item nav-link">
-          Following: {profileData.counts.followingCount}
+          Following: {state.profileData.counts.followingCount}
         </a>
       </div>
 
