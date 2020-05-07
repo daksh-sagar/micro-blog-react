@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useImmerReducer } from 'use-immer'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import axios from 'axios'
@@ -21,6 +21,8 @@ import Search from './components/Search'
 axios.defaults.baseURL = 'http://localhost:8080'
 
 const App = () => {
+  const [isLoading, setIsLoading] = useState(true)
+
   const initialState = {
     loggedIn: Boolean(localStorage.getItem('token')),
     flashMessages: [],
@@ -69,7 +71,39 @@ const App = () => {
     }
   }, [state.loggedIn])
 
-  return (
+  useEffect(() => {
+    if (state.loggedIn) {
+      const request = axios.CancelToken.source()
+      async function checkToken() {
+        try {
+          const response = await axios.post(
+            '/checkToken',
+            { token: state.user.token },
+            {
+              cancelToken: request.token,
+            }
+          )
+
+          if (!response.data) {
+            dispatch({ type: 'logout' })
+          }
+        } catch (error) {
+          console.log(JSON.stringify(error))
+        } finally {
+          setIsLoading(false)
+        }
+      }
+
+      checkToken()
+      return () => request.cancel()
+    } else {
+      setIsLoading(false)
+    }
+  }, [])
+
+  return isLoading ? (
+    <>Loading App...</>
+  ) : (
     <StateContext.Provider value={state}>
       <DispatchContext.Provider value={dispatch}>
         <Router>

@@ -19,6 +19,8 @@ const HeaderLoggedOut = () => {
         setUsername(null)
         setPassword(null)
         dispatch({ type: 'login', data: response.data })
+      } else {
+        dispatch({ type: 'flashMessage', data: 'Invalid username or password' })
       }
     } catch (error) {
       console.log(JSON.stringify(error))
