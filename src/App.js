@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense, lazy } from 'react'
 import { useImmerReducer } from 'use-immer'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import axios from 'axios'
@@ -17,7 +17,7 @@ import Profile from './components/Profile'
 import EditPost from './components/EditPost'
 import NotFound from './components/NotFound'
 import Search from './components/Search'
-import Chat from './components/Chat'
+const Chat = lazy(() => import('./components/Chat'))
 
 axios.defaults.baseURL = 'http://localhost:8080'
 
@@ -144,7 +144,7 @@ const App = () => {
             </Route>
           </Switch>
           {state.isSearchOpen && <Search />}
-          <Chat />
+          <Suspense fallback="">{state.loggedIn && <Chat />}</Suspense>
           <Footer />
         </Router>
       </DispatchContext.Provider>

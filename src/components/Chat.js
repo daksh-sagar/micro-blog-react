@@ -1,13 +1,12 @@
 import React, { useContext, useEffect, useRef } from 'react'
 import { useImmer } from 'use-immer'
 import io from 'socket.io-client'
+import { Link } from 'react-router-dom'
 import DispatchContext from '../contexts/DispatchContext'
 import StateContext from '../contexts/StateContext'
-import { Link } from 'react-router-dom'
-
-const socket = io('http://localhost:8080')
 
 const Chat = () => {
+  const socket = useRef(null)
   const chatField = useRef(null)
   const chatLog = useRef(null)
   const appDispatch = useContext(DispatchContext)
@@ -28,7 +27,7 @@ const Chat = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    socket.emit('chatFromBrowser', {
+    socket.current.emit('chatFromBrowser', {
       message: state.fieldValue,
       token: user.token,
     })
@@ -50,11 +49,15 @@ const Chat = () => {
   }, [isChatOpen])
 
   useEffect(() => {
-    socket.on('chatFromServer', (message) => {
+    socket.current = io('http://localhost:8080')
+
+    socket.current.on('chatFromServer', (message) => {
       setState((draft) => {
         draft.chatMessages.push(message)
       })
     })
+
+    return () => socket.current.disconnect()
   }, [])
 
   useEffect(() => {
